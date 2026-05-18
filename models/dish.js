@@ -27,5 +27,5 @@ const dishSchema = new mongoose.Schema({
 
 
 //Exportera Dish för användning i routes.
-const Dish = mongoose.model("Dish", foodSchema)
+const Dish = mongoose.model("Dish", dishSchema)
 module.exports = Dish;

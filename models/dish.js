@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-const bcrypt = require("bcrypt");
 
 //Modell för måltider
 const dishSchema = new mongoose.Schema({

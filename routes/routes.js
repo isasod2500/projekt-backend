@@ -107,7 +107,7 @@ router.post("/add", async (req, res) => {
         } else if (weekday.includes("Saturday")) {
             weekday = 6;
         } else if (weekday.includes("Sunday")) {
-            weekday = 7;
+            weekday = 0;
         } else {
             return res.status(400).json({
                 message: "Ogiltig veckodag"

@@ -16,6 +16,10 @@ const contactSchema = new mongoose.Schema({
         required: true,
         trim: true,
     },
+    telephone: {
+        type: String,
+        trim: true,
+    },
     created: {
         type: Date,
         default: Date.now

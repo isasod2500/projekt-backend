@@ -16,7 +16,6 @@ const dishSchema = new mongoose.Schema({
     },
     diet: {
         type: String,
-        required: true,
     },
     image: {
         type: String,

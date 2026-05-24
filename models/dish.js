@@ -2,10 +2,6 @@ const mongoose = require("mongoose");
 
 //Modell för måltider
 const dishSchema = new mongoose.Schema({
-    _id: {
-        type: String,
-        default: () => nanoid(),
-    },
     dishname: {
         type: String,
         required: true,
@@ -22,6 +18,13 @@ const dishSchema = new mongoose.Schema({
         type: String,
         required: true,
     },
+    image: {
+        type: String,
+    },
+    weekday: {
+        type: String,
+        required: true,
+    }
 });
 
 

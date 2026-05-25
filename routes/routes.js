@@ -16,6 +16,7 @@ mongoose.connect(process.env.DATABASE).then(() => {
 const Employee = require("../models/employee.js");
 const Dish = require("../models/dish.js");
 const { customAlphabet } = require("nanoid");
+const Contact = require("../models/contact.js");
 const nanoid = customAlphabet(`1234567890`, 4)
 
 function validateRegister(req, res, next) {
@@ -133,12 +134,75 @@ router.post("/add", async (req, res) => {
                 image,
                 weekday
             });
-            return res.status(201).json({ message: `Dish added` })
+            return res.status(201).json({ message: `Dish added: ${result}` })
         }
     } catch (err) {
         console.log(err)
         res.status(400).json(err)
     }
+})
+
+router.post("/contact", async (req, res) => {
+    let errors = {}
+
+    try {
+        let { firstname, surname, email, phone, message } = req.body;
+        console.log(req.body)
+        if (!firstname || !surname || !message) {
+            errors.message = "Saknar information"
+            errors.details = "Fyll i obligatorisk fält"
+
+            errors.https_response.message = "Bad request";
+            errors.https_response.code = 400
+
+            return res.status(400).json(errors)
+        }
+
+        if (!email && !phone) {
+            errors.message = "Saknar information"
+            errors.details = "E-post eller telefon måste fyllas i."
+
+            errors.https_response.message = "Bad request";
+            errors.https_response.code = 400
+
+            return res.status(400).json(errors)
+        }
+
+        if (firstname === "") {
+            errors.push(`Förnamn måste fyllas i`)
+        }
+        if (surname === "") {
+            errors.push(`Efternamn måste fyllas i`)
+        }
+        if (phone === "" && email === "") {
+            errors.push(`Ett av kontaktfälten måste fyllas i`)
+        }
+        if (regex.test(phone)) {
+            errors.push(`Felaktigt format i telefonnumret.`)
+        }
+        if (!email.includes("@")) {
+            errors.push(`Felaktigt format på e-post`)
+        }
+        if (message === "") {
+            errors.push(`Meddelande måste fyllas i.`)
+        }
+
+        if (!errors.message) {
+            let result = await Contact.create({
+                firstname,
+                surname,
+                email,
+                phone,
+                message
+            })
+
+            return res.status(201).json({ message: `Meddelande skickat!` })
+        }
+    } catch (err) {
+        console.log(err)
+        res.status(400).json(err)
+    }
+
 })
 
 module.exports = router;

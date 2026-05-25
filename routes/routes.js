@@ -143,52 +143,41 @@ router.post("/add", async (req, res) => {
 })
 
 router.post("/contact", async (req, res) => {
-    let errors = {}
+    let errors = []
 
     try {
         let { firstname, surname, email, phone, message } = req.body;
         console.log(req.body)
-        if (!firstname || !surname || !message) {
-            errors.message = "Saknar information"
-            errors.details = "Fyll i obligatorisk fält"
 
-            errors.https_response.message = "Bad request";
-            errors.https_response.code = 400
-
-            return res.status(400).json(errors)
-        }
-
-        if (!email && !phone) {
-            errors.message = "Saknar information"
-            errors.details = "E-post eller telefon måste fyllas i."
-
-            errors.https_response.message = "Bad request";
-            errors.https_response.code = 400
-
-            return res.status(400).json(errors)
-        }
-
-        if (firstname === "") {
+        if (!firstname.trim()) {
             errors.push(`Förnamn måste fyllas i`)
         }
-        if (surname === "") {
+        if (!surname.trim()) {
             errors.push(`Efternamn måste fyllas i`)
         }
-        if (phone === "" && email === "") {
-            errors.push(`Ett av kontaktfälten måste fyllas i`)
-        }
-        if (regex.test(phone)) {
-            errors.push(`Felaktigt format i telefonnumret.`)
-        }
-        if (!email.includes("@")) {
-            errors.push(`Felaktigt format på e-post`)
-        }
-        if (message === "") {
+        if (!message.trim()) {
             errors.push(`Meddelande måste fyllas i.`)
         }
+        if (!phone.trim() && !email.trim()) {
+            errors.push(`Ett av kontaktfälten måste fyllas i`)
+        }
+        if (phone && !/^[0-9+\-\s()]+$/.test(phone)) {
+            errors.push(`Felaktigt format i telefonnumret.`)
+        }
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            errors.push(`Felaktigt format på e-post`)
+        }
 
-        if (!errors.message) {
-            let result = await Contact.create({
+        if(errors.length > 0) {
+            return res.status(400).json({
+                message: `Valideringsfel`,
+                errors
+            })
+        }
+
+
+        if (errors.length == 0) {
+            await Contact.create({
                 firstname,
                 surname,
                 email,

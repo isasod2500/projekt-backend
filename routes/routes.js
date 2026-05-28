@@ -17,7 +17,10 @@ const Employee = require("../models/employee.js");
 const Dish = require("../models/dish.js");
 const { customAlphabet } = require("nanoid");
 const Contact = require("../models/contact.js");
-const nanoid = customAlphabet(`1234567890`, 4)
+const Order = require("../models/order.js");
+const nanoidUser = customAlphabet(`1234567890`, 4);
+const nanoidFood = customAlphabet(`1234567890`, 6);
+const nanoidOrder = customAlphabet(`1234567890`, 10);
 
 function validateRegister(req, res, next) {
     const { password, firstname, surname, admin } = req.body;
@@ -59,11 +62,11 @@ router.post("/register", validateRegister, async (req, res) => {
 
         let first = firstname.slice(0, 3).toLowerCase().replace(/[åä]/g, "a").replace(/[ö]/g, "o")
         let sur = surname.slice(0, 3).toLowerCase().replace(/[åä]/g, "a").replace(/[ö]/g, "o")
-
-        const username = `${first}${sur}${nanoid()}`
+        const id = `${nanoidUser()}`
+        const username = `${first}${sur}${id}`
         const email = `${username}@E4Haket.se`
 
-        const employee = new Employee({ username, password, firstname, surname, email, admin })
+        const employee = new Employee({ id, username, password, firstname, surname, email, admin })
         await employee.save();
 
         res.status(201).json({ message: `User successfully created` })
@@ -94,7 +97,8 @@ router.get("/add", (req, res) => {
 router.post("/add", async (req, res) => {
     let errors = {}
     try {
-        let { dishname, ingredients, allergens, diet, image, weekday } = req.body;
+        let { dishname, ingredients, allergens, diet, price, image, weekday } = req.body;
+        let id = `${nanoidFood()}`
         if (weekday.includes("Monday")) {
             weekday = 1;
         } else if (weekday.includes("Tuesday")) {
@@ -127,10 +131,12 @@ router.post("/add", async (req, res) => {
 
         if (!errors.message) {
             let result = await Dish.create({
+                id,
                 dishname,
                 ingredients,
                 allergens,
                 diet,
+                price,
                 image,
                 weekday
             });
@@ -143,7 +149,7 @@ router.post("/add", async (req, res) => {
 })
 
 router.post("/contact", async (req, res) => {
-    let errors = []
+    const errors = []
 
     try {
         let { firstname, surname, email, phone, message } = req.body;
@@ -168,7 +174,7 @@ router.post("/contact", async (req, res) => {
             errors.push(`Felaktigt format på e-post`)
         }
 
-        if(errors.length > 0) {
+        if (errors.length > 0) {
             return res.status(400).json({
                 message: `Valideringsfel`,
                 errors
@@ -191,7 +197,76 @@ router.post("/contact", async (req, res) => {
         console.log(err)
         res.status(400).json(err)
     }
+});
 
+router.get("/order/index", async (req, res) => {
+    try {
+        let result = await Dish.find({});
+        return res.json(result)
+    } catch (err) {
+        return res.status(500).json(err)
+    }
+})
+
+router.post("/order", async (req, res) => {
+    const errors = [];
+    try {
+
+
+        let { name, email, phone, dishes, totalPrice, message, pickup } = req.body;
+        let id = `${nanoidOrder()}`
+
+        console.log(req.body)
+        console.log(dishes)
+        if (!name.trim()) {
+            errors.push(`Namn måste fyllas i`)
+        }
+
+        if (!dishes || dishes.length == 0) {
+            errors.push(`Varukorgen är tom - Välj minst en maträtt`)
+        }
+
+        if (!pickup.trim()) {
+            errors.push(`Önskad upphämtningstid måste fyllas i`)
+        }
+
+        if (!phone.trim() && !email.trim()) {
+            errors.push(`Ett av kontaktfälten måste fyllas i`)
+        }
+
+        if (phone && !/^[0-9+\-\s()]+$/.test(phone)) {
+            errors.push(`Felaktigt format i telefonnumret.`)
+        }
+
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            errors.push(`Felaktigt format på e-post`)
+        }
+
+        if (errors.length > 0) {
+            return res.status(400).json({
+                message: `Valideringsfel`,
+                errors
+            })
+        }
+
+        if (errors.length == 0) {
+            await Order.create({
+                id,
+                name,
+                email,
+                phone,
+                dishes,
+                totalPrice,
+                message,
+                pickup
+            })
+
+            return res.status(201).json({ message: `Beställning skickad!` })
+        }
+
+    } catch (err) {
+        console.log(err)
+    }
 })
 
 module.exports = router;

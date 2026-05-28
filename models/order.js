@@ -1,9 +1,14 @@
 const mongoose = require("mongoose")
+const { nanoid } = require("nanoid");
+const { customAlphabet } = require("nanoid");
 
-const takeawaySchema = new mongoose.Schema({
+const orderID = customAlphabet(`1234567890`, 8)
+const Dish = require("../models/dish.js");
+
+const orderSchema = new mongoose.Schema({
     _id: {
         type: String,
-        default: () => nanoid(7),
+        default: () => orderID(),
     },
     name: {
         type: String,
@@ -13,8 +18,8 @@ const takeawaySchema = new mongoose.Schema({
 
     dishes: [
         {
-            productId: mongoose.Schema.Types.ObjectId,
-            name: String,
+            id: String,
+            dishname: String,
             price: Number,
             quantity: {
                 type: Number,
@@ -32,8 +37,12 @@ const takeawaySchema = new mongoose.Schema({
         type: String,
         trim: true,
     },
-    price: {
+    totalPrice: {
         type: Number,
+        required: true,
+    },
+    pickup: {
+        type: String,
         required: true,
     },
     status: {
@@ -47,5 +56,5 @@ const takeawaySchema = new mongoose.Schema({
     }
 })
 
-const Takeaway = mongoose.model("Takeaway", takeawaySchema)
-module.exports = Takeaway;
+const Order = mongoose.model("Order", orderSchema)
+module.exports = Order;

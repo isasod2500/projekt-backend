@@ -15,9 +15,10 @@ mongoose.connect(process.env.DATABASE).then(() => {
 //Importera mall för användare och maträtt
 const Employee = require("../models/employee.js");
 const Dish = require("../models/dish.js");
-const { customAlphabet } = require("nanoid");
+const Review = require("../models/review.js")
 const Contact = require("../models/contact.js");
 const Order = require("../models/order.js");
+const { customAlphabet } = require("nanoid");
 const nanoidUser = customAlphabet(`1234567890`, 4);
 const nanoidFood = customAlphabet(`1234567890`, 6);
 const nanoidOrder = customAlphabet(`1234567890`, 10);
@@ -95,7 +96,11 @@ router.get("/add", (req, res) => {
 })
 
 router.post("/add", async (req, res) => {
-    let errors = {}
+    let errors = {
+        message: "",
+        details: "",
+        https_response: {}
+    }
     try {
         let { dishname, ingredients, allergens, diet, price, image, weekday } = req.body;
         let id = `${nanoidFood()}`
@@ -131,7 +136,7 @@ router.post("/add", async (req, res) => {
 
         if (!errors.message) {
             let result = await Dish.create({
-                id,
+                _id: id,
                 dishname,
                 ingredients,
                 allergens,
@@ -147,6 +152,67 @@ router.post("/add", async (req, res) => {
         res.status(400).json(err)
     }
 })
+
+
+router.post("/order", async (req, res) => {
+    const errors = [];
+    try {
+
+
+        let { name, email, phone, dishes, totalPrice, message, pickup } = req.body;
+        let id = `${nanoidOrder()}`
+
+        if (!name || !name.trim()) {
+            errors.push(`Namn måste fyllas i`)
+        }
+
+        if (!dishes || dishes.length == 0) {
+            errors.push(`Varukorgen är tom - Välj minst en maträtt`)
+        }
+
+        if (!pickup.trim()) {
+            errors.push(`Önskad upphämtningstid måste fyllas i`)
+        }
+
+        if (!phone.trim() && !email.trim()) {
+            errors.push(`Ett av kontaktfälten måste fyllas i`)
+        }
+
+        if (phone && !/^[0-9+\-\s()]+$/.test(phone)) {
+            errors.push(`Felaktigt format i telefonnumret.`)
+        }
+
+        if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+            errors.push(`Felaktigt format på e-post`)
+        }
+
+        if (errors.length > 0) {
+            return res.status(400).json({
+                message: `Valideringsfel`,
+                errors
+            })
+        }
+
+        if (errors.length == 0) {
+            await Order.create({
+                _id: id,
+                name,
+                email,
+                phone,
+                dishes,
+                totalPrice,
+                message,
+                pickup
+            })
+
+            return res.status(201).json({ message: `Beställning skickad!` })
+        }
+
+    } catch (err) {
+        console.log(err)
+    }
+})
+
 
 router.post("/contact", async (req, res) => {
     const errors = []
@@ -199,48 +265,25 @@ router.post("/contact", async (req, res) => {
     }
 });
 
-router.get("/order/index", async (req, res) => {
+router.post("/review", async (req, res) => {
+    const errors = []
+
     try {
-        let result = await Dish.find({});
-        return res.json(result)
-    } catch (err) {
-        return res.status(500).json(err)
-    }
-})
-
-router.post("/order", async (req, res) => {
-    const errors = [];
-    try {
-
-
-        let { name, email, phone, dishes, totalPrice, message, pickup } = req.body;
-        let id = `${nanoidOrder()}`
-
+        let { name, email, rating, message, allowAnswer } = req.body;
         console.log(req.body)
-        console.log(dishes)
-        if (!name.trim()) {
-            errors.push(`Namn måste fyllas i`)
-        }
 
-        if (!dishes || dishes.length == 0) {
-            errors.push(`Varukorgen är tom - Välj minst en maträtt`)
-        }
-
-        if (!pickup.trim()) {
-            errors.push(`Önskad upphämtningstid måste fyllas i`)
-        }
-
-        if (!phone.trim() && !email.trim()) {
-            errors.push(`Ett av kontaktfälten måste fyllas i`)
-        }
-
-        if (phone && !/^[0-9+\-\s()]+$/.test(phone)) {
-            errors.push(`Felaktigt format i telefonnumret.`)
+        if (!name || !name.trim()) {
+            errors.push(`Förnamn måste fyllas i`)
         }
 
         if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             errors.push(`Felaktigt format på e-post`)
         }
+
+        if (!rating || !rating.trim()) {
+            errors.push(`Betyg måste fyllas i`)
+        }
+
 
         if (errors.length > 0) {
             return res.status(400).json({
@@ -249,23 +292,25 @@ router.post("/order", async (req, res) => {
             })
         }
 
-        if (errors.length == 0) {
-            await Order.create({
-                id,
-                name,
-                email,
-                phone,
-                dishes,
-                totalPrice,
-                message,
-                pickup
-            })
+        await Review.create({
+            name,
+            email,
+            rating,
+            message,
+            allowAnswer,
+        })
 
-            return res.status(201).json({ message: `Beställning skickad!` })
-        }
-
+        return res.status(201).json({
+            message: "Recension sparad!"
+        })
     } catch (err) {
+
         console.log(err)
+        res.status(500).json({
+            message: "Serverfel",
+            errors: ["Något gick fel"]
+        })
+
     }
 })
 

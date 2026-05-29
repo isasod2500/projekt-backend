@@ -17,8 +17,8 @@ const orderSchema = new mongoose.Schema({
     },
 
     dishes: [
-        {
-            id: String,
+        {   
+            _id: String,
             dishname: String,
             price: Number,
             quantity: {
@@ -26,14 +26,14 @@ const orderSchema = new mongoose.Schema({
                 required: true,
                 min: 1,
             },
-        }
+        },
     ],
 
     email: {
         type: String,
         trim: true,
     },
-    telephone: {
+    phone: {
         type: String,
         trim: true,
     },

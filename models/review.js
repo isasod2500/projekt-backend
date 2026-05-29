@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const reviewSchema = new mongoose.Schema({
-    nickname: {
+    name: {
         type: String,
         required: true,
         trim: true,
@@ -14,6 +14,13 @@ const reviewSchema = new mongoose.Schema({
     rating: {
         type: Number,
         required: true,
+    },
+    message: {
+        type: String,
+    },
+    allowAnswer: {
+        type: Boolean,
+        required: true
     },
     created: {
         type: Date,

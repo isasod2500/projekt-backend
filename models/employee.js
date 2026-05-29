@@ -3,10 +3,13 @@ const bcrypt = require("bcrypt");
 const { nanoid } = require("nanoid");
 const { customAlphabet } = require("nanoid");
 
+const userID = customAlphabet("1234567890", 4)
+
 //Modell för anställda
 const employeeSchema = new mongoose.Schema({
-    id: {
+    _id: {
         type: String,
+        default: () => userID,
     },
     username: {
         type: String,

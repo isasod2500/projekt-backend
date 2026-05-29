@@ -67,7 +67,7 @@ router.post("/register", validateRegister, async (req, res) => {
         const username = `${first}${sur}${id}`
         const email = `${username}@E4Haket.se`
 
-        const employee = new Employee({ id, username, password, firstname, surname, email, admin })
+        const employee = new Employee({ _id: id, username, password, firstname, surname, email, admin })
         await employee.save();
 
         res.status(201).json({ message: `User successfully created` })

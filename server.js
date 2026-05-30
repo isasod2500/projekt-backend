@@ -36,6 +36,11 @@ function authenticateToken(req, res, next) {
     })
 }
 
+app.get("/signedin", authenticateToken, (req, res) => {
+
+    res.json({ message: `USER SIGNED IN OK` })
+})
+
 app.use("/", routes)
 
 app.listen(port, () => {

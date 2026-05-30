@@ -51,7 +51,7 @@ function validateRegister(req, res, next) {
     next();
 }
 
-//Route för att regiweekdayera användare
+//Route för att registrera användare
 router.post("/register", validateRegister, async (req, res) => {
     try {
         const { password, firstname, surname, admin } = req.body;
@@ -79,6 +79,69 @@ router.post("/register", validateRegister, async (req, res) => {
         res.status(500).json({ error: `${err}` })
     }
 })
+
+router.post("/login", async (req, res) => {
+    try {
+        const { username, password } = req.body;
+
+        if (!username || !password) {
+            return res.status(400).json({ error: `Username and password has to be entered` })
+        }
+
+        let employee = await Employee.findOne({ username: username }).select("+password")
+
+        if (!user) {
+            return res.status(400).json({ error: `Incorrect username or password` })
+        }
+
+        const matchingPassword = await user.comparePassword(password);
+        if (!matchingPassword) {
+            return res.status(401).json({ error: `Incorrect username or password` })
+        }
+
+        const payload = { username: employee.username }
+        const token = jwt.sign(payload, process.env.JWT_SECRET_KEY, {
+            expiresIn: "2h"
+        })
+
+        employee = await Employee.findOne({ username: username });
+        const response = {
+            employee,
+            token
+        }
+        res.status(200).json(response)
+    } catch (err) {
+        res.status(401).json({
+            error: err.message
+        })
+    }
+})
+
+router.get("/intranet", async (req, res) => {
+    
+    try {
+        const employee = await Employee.findOne({ username: req.employee.username })
+
+        if(!employee) {
+            return res.status(403).json({ error: `Unauthorised. Username not found.`})
+        }
+
+        res.json({
+            username: employee.username,
+            firstname: employee.firstname,
+            surname: employee.surname,
+        })
+
+
+    } catch(err) {
+        res.status(500).json({
+            error: err.message
+        })
+    }
+}) 
+
+
+
 
 router.get("/index", async (req, res) => {
     const d = new Date()

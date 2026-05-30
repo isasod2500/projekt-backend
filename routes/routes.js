@@ -23,6 +23,22 @@ const nanoidUser = customAlphabet(`1234567890`, 4);
 const nanoidFood = customAlphabet(`1234567890`, 6);
 const nanoidOrder = customAlphabet(`1234567890`, 10);
 
+//Kod för att verifiera token
+function authenticateToken(req, res, next) {
+    const authHeader = req.headers["authorization"]
+    const token = authHeader && authHeader.split(" ")[1]
+
+    if (token == null) {
+        return res.status(401).json({ message: "Not authorised" })
+    }
+    jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decrypted) => {
+        if (err) return res.status(403).json({ message: `${err}` })
+        req.employee = decrypted
+        next();
+    })
+}
+
+//Kod för att verifiera registrering
 function validateRegister(req, res, next) {
     const { password, firstname, surname, admin } = req.body;
 
@@ -80,23 +96,39 @@ router.post("/register", validateRegister, async (req, res) => {
     }
 })
 
+router.get("/login", async (req, res) => {
+    res.json({ message: "API NÅDD" });
+})
+
 router.post("/login", async (req, res) => {
+
+    const errors = []
     try {
         const { username, password } = req.body;
 
         if (!username || !password) {
-            return res.status(400).json({ error: `Username and password has to be entered` })
+            errors.push(`Username and password must be provided`)
         }
-
         let employee = await Employee.findOne({ username: username }).select("+password")
+        if (!employee) {
+            errors.push(`Incorrect username or password`)
+        } else {
+            const matchingPassword = await employee.comparePassword(password);
 
-        if (!user) {
-            return res.status(400).json({ error: `Incorrect username or password` })
+            if (!matchingPassword) {
+                errors.push(`Incorrect username or password`)
+            }
         }
 
-        const matchingPassword = await user.comparePassword(password);
-        if (!matchingPassword) {
-            return res.status(401).json({ error: `Incorrect username or password` })
+
+
+
+        if (errors.length > 0) {
+
+            return res.status(400).json({
+                message: `Valideringsfel`,
+                errors
+            })
         }
 
         const payload = { username: employee.username }
@@ -109,7 +141,8 @@ router.post("/login", async (req, res) => {
             employee,
             token
         }
-        res.status(200).json(response)
+
+        res.status(200).json(response);
     } catch (err) {
         res.status(401).json({
             error: err.message
@@ -117,28 +150,30 @@ router.post("/login", async (req, res) => {
     }
 })
 
-router.get("/intranet", async (req, res) => {
-    
+router.get("/intranet", authenticateToken, async (req, res) => {
     try {
         const employee = await Employee.findOne({ username: req.employee.username })
 
-        if(!employee) {
-            return res.status(403).json({ error: `Unauthorised. Username not found.`})
+
+        console.log(employee)
+        if (!employee) {
+            return res.status(403).json({ error: `Unauthorised. Username not found.` })
         }
 
         res.json({
             username: employee.username,
             firstname: employee.firstname,
             surname: employee.surname,
+            admin: employee.admin,
         })
 
 
-    } catch(err) {
+    } catch (err) {
         res.status(500).json({
             error: err.message
         })
     }
-}) 
+})
 
 
 

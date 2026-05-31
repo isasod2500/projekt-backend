@@ -154,8 +154,6 @@ router.get("/intranet", authenticateToken, async (req, res) => {
     try {
         const employee = await Employee.findOne({ username: req.employee.username })
 
-
-        console.log(employee)
         if (!employee) {
             return res.status(403).json({ error: `Unauthorised. Username not found.` })
         }
@@ -308,6 +306,52 @@ router.post("/order", async (req, res) => {
 
     } catch (err) {
         console.log(err)
+    }
+})
+
+router.get("/order", async (req, res) => {
+    try {
+        let result = await Order.find({});
+        return res.json(result)
+    } catch (err) {
+        return res.status(500).json({ error: err })
+    }
+})
+
+router.put("/order/:id", async (req, res) => {
+    try {
+        let { id } = req.params
+        console.log(id)
+
+        let order = await Order.findById(id)
+
+        let updatedStatus;
+
+
+        if (order.status === "received") {
+            updatedStatus = "pending"
+        }
+
+        if (order.status === "pending") {
+            updatedStatus = "done";
+        }
+
+        if (order.status === "done") {
+            updatedStatus = "picked-up"
+        }
+
+
+        let result = await Order.findOneAndUpdate(
+            { _id: id },
+            { $set: { status: updatedStatus } },
+            { new: true }
+        );
+        console.log(result)
+        return res.status(201).json({ message: "Entry updated" })
+
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: err })
     }
 })
 

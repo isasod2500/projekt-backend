@@ -41,6 +41,10 @@ const orderSchema = new mongoose.Schema({
         type: Number,
         required: true,
     },
+    message: {
+        type: String,
+        trim: true,
+    },
     pickup: {
         type: String,
         required: true,

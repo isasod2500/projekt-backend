@@ -29,6 +29,7 @@ function authenticateToken(req, res, next) {
     const token = authHeader && authHeader.split(" ")[1]
 
     if (token == null) {
+        console.log(`Unauthorised`)
         return res.status(401).json({ message: "Not authorised" })
     }
     jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decrypted) => {
@@ -186,9 +187,16 @@ router.get("/index", async (req, res) => {
         return res.status(500).json(err)
     }
 })
-
-router.get("/add", async (req, res) => {
+//Backend
+router.get("/add", authenticateToken, async (req, res) => {
     try {
+
+        const employee = await Employee.findOne({ username: req.employee.username })
+
+        if (!employee) {
+            return res.status(403).json({ error: `Unauthorised. Username not found.` })
+        }
+
         let result = await Dish.find({});
         return res.json(result)
     } catch (err) {
@@ -254,7 +262,7 @@ router.post("/add", async (req, res) => {
     }
 })
 
-router.get("/add/:id", async (req, res) => {
+router.get("/add/:id", authenticateToken, async (req, res) => {
     try {
         let { id } = req.params
 
@@ -292,7 +300,7 @@ router.put("/add/:id", async (req, res) => {
             weekday = 0;
         } else {
             errors.push(`Veckodag måste fyllas i`)
-                
+
         }
 
         if (!dishname) {
@@ -342,7 +350,7 @@ router.put("/add/:id", async (req, res) => {
     }
 })
 
-router.post("/order", async (req, res) => {
+router.post("/orders", async (req, res) => {
     const errors = [];
     try {
 
@@ -401,8 +409,15 @@ router.post("/order", async (req, res) => {
     }
 })
 
-router.get("/order", async (req, res) => {
+router.get("/orders", authenticateToken, async (req, res) => {
     try {
+
+        const employee = await Employee.findOne({ username: req.employee.username })
+
+        if (!employee) {
+            return res.status(403).json({ error: `Unauthorised. Username not found.` })
+        }
+
         let result = await Order.find({});
         return res.json(result)
     } catch (err) {
@@ -410,7 +425,7 @@ router.get("/order", async (req, res) => {
     }
 })
 
-router.put("/order/:id", async (req, res) => {
+router.put("/orders/:id", async (req, res) => {
     try {
         let { id } = req.params
         console.log(id)
@@ -447,7 +462,26 @@ router.put("/order/:id", async (req, res) => {
     }
 })
 
+//Backend
+router.get("/contact", authenticateToken, async (req, res) => {
+    try {
 
+        const employee = await Employee.findOne({ username: req.employee.username })
+
+        if (!employee) {
+            return res.status(403).json({ error: `Unauthorised. Username not found.` })
+        }
+
+        let result = await Contact.find({})
+
+        return res.json(result)
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: err })
+    }
+})
+
+//Frontend
 router.post("/contact", async (req, res) => {
     const errors = []
 
@@ -499,6 +533,16 @@ router.post("/contact", async (req, res) => {
     }
 });
 
+router.get("/review", async (req, res) => {
+    try {
+        let response = await Review.find({})
+
+        return res.status(200).json(response)
+    } catch (err) {
+        return res.status(500).json(err)
+    }
+})
+
 router.post("/review", async (req, res) => {
     const errors = []
 
@@ -548,4 +592,20 @@ router.post("/review", async (req, res) => {
     }
 })
 
+router.get("/admin", authenticateToken, async (req, res) => {
+    try {
+        const employee = await Employee.findOne({ username: req.employee.username })
+
+        if (!employee) {
+            return res.status(403).json({ error: `Unauthorised. Username not found.` })
+        }
+
+        const result = await Employee.find({})
+
+        return res.status(200).json(result)
+    } catch(err) {
+        console.log(err)
+        return res.status(403).json({ error: err })
+    }
+})
 module.exports = router;

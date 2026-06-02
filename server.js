@@ -18,10 +18,6 @@ app.get("/", async (req, res) => {
     res.json({ message: "API NÅDD" })
 })
 
-app.get("/admin", authenticateToken, (req, res) => {
-    res.json({ message: `Access approved` })
-});
-
 function authenticateToken(req, res, next) {
     const authHeader = req.headers["authorization"]
     const token = authHeader && authHeader.split(" ")[1]

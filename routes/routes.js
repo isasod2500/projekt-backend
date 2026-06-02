@@ -187,8 +187,13 @@ router.get("/index", async (req, res) => {
     }
 })
 
-router.get("/add", (req, res) => {
-    return res.status(201).json({ message: `API NÅDD` })
+router.get("/add", async (req, res) => {
+    try {
+        let result = await Dish.find({});
+        return res.json(result)
+    } catch (err) {
+        return res.status(500).json({ error: err })
+    }
 })
 
 router.post("/add", async (req, res) => {
@@ -249,6 +254,93 @@ router.post("/add", async (req, res) => {
     }
 })
 
+router.get("/add/:id", async (req, res) => {
+    try {
+        let { id } = req.params
+
+        console.log(id)
+
+        let dish = await Dish.findById(id)
+        console.log(dish)
+        return res.status(200).json(dish)
+
+    } catch (err) {
+        console.log(err)
+        res.status(500).json(err)
+    }
+})
+
+router.put("/add/:id", async (req, res) => {
+    const errors = []
+    try {
+        let { dishname, ingredients, allergens, diet, price, image, weekday } = req.body;
+        let id = req.params.id
+
+        if (weekday.includes("monday")) {
+            weekday = 1;
+        } else if (weekday.includes("tuesday")) {
+            weekday = 2;
+        } else if (weekday.includes("wednesday")) {
+            weekday = 3;
+        } else if (weekday.includes("thursday")) {
+            weekday = 4;
+        } else if (weekday.includes("friday")) {
+            weekday = 5;
+        } else if (weekday.includes("saturday")) {
+            weekday = 6;
+        } else if (weekday.includes("sunday")) {
+            weekday = 0;
+        } else {
+            errors.push(`Veckodag måste fyllas i`)
+                
+        }
+
+        if (!dishname) {
+            errors.push(`Maträttens namn måste fyllas i`)
+        }
+
+        if (!ingredients) {
+            errors.push(`Ingredienser måste fyllas i`)
+        }
+
+        if (!allergens) {
+            errors.push(`Allergener måste fyllas i. Om inga finns, skriv 'inga'`)
+        }
+
+        if (!price) {
+            errors.push(`Pris måste fyllas i`)
+        }
+
+        if (errors.length > 0) {
+
+            return res.status(400).json({
+                message: `Valideringsfel`,
+                errors
+            })
+        }
+
+        let result = await Dish.updateOne({ "_id": id },
+            {
+                $set:
+                {
+                    dishname: dishname,
+                    ingredients: ingredients,
+                    allergens: allergens,
+                    diet: diet,
+                    price: price,
+                    image: image,
+                    weekday: weekday
+                }
+            }
+        )
+
+        return res.status(201).json({ message: `Dish updated` })
+
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json({ error: err })
+    }
+})
 
 router.post("/order", async (req, res) => {
     const errors = [];

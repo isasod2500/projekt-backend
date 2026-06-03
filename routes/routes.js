@@ -62,8 +62,10 @@ function validateRegister(req, res, next) {
     }
 
     if (errors.length > 0) {
+        console.log(`Errors Reached`)
         return res.status(400).json({ errors })
     }
+
 
     next();
 }
@@ -71,11 +73,17 @@ function validateRegister(req, res, next) {
 //Route för att registrera användare
 router.post("/register", validateRegister, async (req, res) => {
     try {
-        const { password, firstname, surname, admin } = req.body;
+        let { password, firstname, surname, admin } = req.body;
 
 
         if (!password || !firstname || !surname || !admin) {
             return res.status(400).json({ error: `Invalid input, all fields must be entered.` })
+        }
+
+        if(admin == "admin") {
+            admin = true
+        } else {
+            admin = false
         }
 
         let first = firstname.slice(0, 3).toLowerCase().replace(/[åä]/g, "a").replace(/[ö]/g, "o")
@@ -94,6 +102,7 @@ router.post("/register", validateRegister, async (req, res) => {
             return res.status(409).json({ message: `Username already taken` })
         }
         res.status(500).json({ error: `${err}` })
+        console.log(err)
     }
 })
 
@@ -600,10 +609,17 @@ router.get("/admin", authenticateToken, async (req, res) => {
             return res.status(403).json({ error: `Unauthorised. Username not found.` })
         }
 
+        if (employee.admin === false) {
+            return res.status(403).json({ error: `Unauthorised.` })
+        }
+
         const result = await Employee.find({})
 
-        return res.status(200).json(result)
-    } catch(err) {
+        return res.status(200).json({
+            message: `User found and admin verified.`,
+            result
+        })
+    } catch (err) {
         console.log(err)
         return res.status(403).json({ error: err })
     }

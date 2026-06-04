@@ -3,6 +3,7 @@ const bodyParser = require("body-parser")
 const routes = require("./routes/routes")
 const jwt = require("jsonwebtoken")
 const cors = require("cors")
+const path = require("path")
 require("dotenv").config();
 
 const app = express();
@@ -12,6 +13,7 @@ app.use(cors({
     origin: "*"
 }))
 
+app.use("/uploads", express.static(path.join(__dirname, "uploads")))
 const port = process.env.PORT || 3000;
 
 app.get("/", async (req, res) => {

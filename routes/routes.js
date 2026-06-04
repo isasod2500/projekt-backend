@@ -2,7 +2,26 @@ const express = require("express")
 const router = express.Router();
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken")
+const multer = require("multer")
+const sharp = require("sharp")
+const path = require("path")
 
+
+const storage = multer.diskStorage(
+    {
+        destination: (req, file, cb) => {
+            cb(null, "uploads/");
+        },
+
+        filename: (req, file, cb) => {
+            console.log(file)
+            const ext = path.extname(file.originalname)
+            cb(null, `${Date.now()}${ext}`)
+        }
+    }
+)
+
+const upload = multer({ storage: multer.memoryStorage() })
 require("dotenv").config();
 
 mongoose.set("strictQuery", false);
@@ -80,7 +99,7 @@ router.post("/register", validateRegister, async (req, res) => {
             return res.status(400).json({ error: `Invalid input, all fields must be entered.` })
         }
 
-        if(admin == "admin") {
+        if (admin == "admin") {
             admin = true
         } else {
             admin = false
@@ -213,14 +232,26 @@ router.get("/add", authenticateToken, async (req, res) => {
     }
 })
 
-router.post("/add", async (req, res) => {
+router.post("/add", upload.single("image"), async (req, res) => {
     let errors = {
         message: "",
         details: "",
         https_response: {}
     }
+
+    console.log(`Filnamn: ${req.file}`)
+
+    const outputFilename = `${Date.now()}.jpg`;
+
+    if (req.file) {
+        await sharp(req.file.buffer)
+            .resize(300, 300, { fit: "cover" })
+            .jpeg({ quality: 80 })
+            .toFile(`uploads/${outputFilename}`)
+    }
+
     try {
-        let { dishname, ingredients, allergens, diet, price, image, weekday } = req.body;
+        let { dishname, ingredients, allergens, diet, price, weekday } = req.body;
         let id = `${nanoidFood()}`
         if (weekday.includes("Monday")) {
             weekday = 1;
@@ -242,7 +273,7 @@ router.post("/add", async (req, res) => {
             });
         }
 
-        if (!dishname || !ingredients || !allergens || !diet || weekday === undefined) {
+        if (!dishname || !ingredients || !allergens || weekday === undefined) {
             errors.message = "Saknar information"
             errors.details = "Fyll i obligatorisk fält"
 
@@ -260,7 +291,7 @@ router.post("/add", async (req, res) => {
                 allergens,
                 diet,
                 price,
-                image,
+                image: req.file ? `http://localhost:3000/uploads/${outputFilename}` : null,
                 weekday
             });
             return res.status(201).json({ message: `Dish added: ${result}` })
@@ -287,10 +318,26 @@ router.get("/add/:id", authenticateToken, async (req, res) => {
     }
 })
 
-router.put("/add/:id", async (req, res) => {
-    const errors = []
+router.put("/add/:id", upload.single("image"), async (req, res) => {
+    let errors = {
+        message: "",
+        details: "",
+        https_response: {}
+    }
+
+    console.log(`Filnamn: ${req.file}`)
+
+    const outputFilename = `${Date.now()}.jpg`;
+
+    if (req.file) {
+        await sharp(req.file.buffer)
+            .resize(300, 300, { fit: "cover" })
+            .jpeg({ quality: 80 })
+            .toFile(`uploads/${outputFilename}`)
+    }
+
     try {
-        let { dishname, ingredients, allergens, diet, price, image, weekday } = req.body;
+        let { dishname, ingredients, allergens, diet, price, weekday } = req.body;
         let id = req.params.id
 
         if (weekday.includes("monday")) {
@@ -345,7 +392,7 @@ router.put("/add/:id", async (req, res) => {
                     allergens: allergens,
                     diet: diet,
                     price: price,
-                    image: image,
+                    image: req.file ? `http://localhost:3000/uploads/${outputFilename}` : null,
                     weekday: weekday
                 }
             }
@@ -622,6 +669,54 @@ router.get("/admin", authenticateToken, async (req, res) => {
     } catch (err) {
         console.log(err)
         return res.status(403).json({ error: err })
+    }
+})
+
+router.delete("/delete/dish/:id", async (req, res) => {
+    let { id } = req.params
+    console.log(id)
+    try {
+        let dish = await Dish.findById(id)
+        console.log(dish)
+
+        let result = await Dish.deleteOne({ _id: id})
+
+        return res.status(200).json({ message: `Dish removed`})
+    } catch(err) {
+        console.log(err)
+        return res.status(500).json({ error: err })
+    }
+})
+
+router.delete("/delete/review/:id", async (req, res) => {
+    let { id } = req.params
+    console.log(id)
+    try {
+        let review = await Review.findById(id)
+        console.log(review)
+
+        let result = await Review.deleteOne({ _id: id})
+
+        return res.status(200).json({ message: `Review removed`})
+    } catch(err) {
+        console.log(err)
+        return res.status(500).json({ error: err })
+    }
+})
+
+router.delete("/delete/contact/:id", async (req, res) => {
+    let { id } = req.params
+    console.log(id)
+    try {
+        let contact = await Contact.findById(id)
+        console.log(contact)
+
+        let result = await Contact.deleteOne({ _id: id})
+
+        return res.status(200).json({ message: `Contact removed`})
+    } catch(err) {
+        console.log(err)
+        return res.status(500).json({ error: err })
     }
 })
 module.exports = router;

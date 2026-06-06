@@ -14,7 +14,7 @@ const storage = multer.diskStorage(
         },
 
         filename: (req, file, cb) => {
-            console.log(file)
+            (file)
             const ext = path.extname(file.originalname)
             cb(null, `${Date.now()}${ext}`)
         }
@@ -48,7 +48,7 @@ function authenticateToken(req, res, next) {
     const token = authHeader && authHeader.split(" ")[1]
 
     if (token == null) {
-        console.log(`Unauthorised`)
+        (`Unauthorised`)
         return res.status(401).json({ message: "Not authorised" })
     }
     jwt.verify(token, process.env.JWT_SECRET_KEY, (err, decrypted) => {
@@ -81,7 +81,7 @@ function validateRegister(req, res, next) {
     }
 
     if (errors.length > 0) {
-        console.log(`Errors Reached`)
+        (`Errors Reached`)
         return res.status(400).json({ errors })
     }
 
@@ -239,7 +239,7 @@ router.post("/add", upload.single("image"), async (req, res) => {
         https_response: {}
     }
 
-    console.log(`Filnamn: ${req.file}`)
+    (`Filnamn: ${req.file}`)
 
     const outputFilename = `${Date.now()}.jpg`;
 
@@ -307,10 +307,10 @@ router.get("/add/:id", authenticateToken, async (req, res) => {
     try {
         let { id } = req.params
 
-        console.log(id)
+        (id)
 
         let dish = await Dish.findById(id)
-        console.log(dish)
+        (dish)
         return res.status(200).json(dish)
 
     } catch (err) {
@@ -326,7 +326,7 @@ router.put("/add/:id", upload.single("image"), async (req, res) => {
         https_response: {}
     }
 
-    console.log(`Filnamn: ${req.file}`)
+    (`Filnamn: ${req.file}`)
 
     const outputFilename = `${Date.now()}.jpg`;
 
@@ -393,7 +393,7 @@ router.put("/add/:id", upload.single("image"), async (req, res) => {
                     allergens: allergens,
                     diet: diet,
                     price: price,
-                    image: req.file ? outputFilename : null,
+                    image: req.file ? outputFilename : dish.image,
                     weekday: weekday
                 }
             }
@@ -485,7 +485,7 @@ router.get("/orders", authenticateToken, async (req, res) => {
 router.put("/orders/:id", async (req, res) => {
     try {
         let { id } = req.params
-        console.log(id)
+        (id)
 
         let order = await Order.findById(id)
 
@@ -510,7 +510,7 @@ router.put("/orders/:id", async (req, res) => {
             { $set: { status: updatedStatus } },
             { new: true }
         );
-        console.log(result)
+        (result)
         return res.status(201).json({ message: "Entry updated" })
 
     } catch (err) {
@@ -544,7 +544,7 @@ router.post("/contact", async (req, res) => {
 
     try {
         let { firstname, surname, email, phone, message } = req.body;
-        console.log(req.body)
+        (req.body)
 
         if (!firstname.trim()) {
             errors.push(`Förnamn måste fyllas i`)
@@ -605,7 +605,7 @@ router.post("/review", async (req, res) => {
 
     try {
         let { name, email, rating, message, allowAnswer } = req.body;
-        console.log(req.body)
+        (req.body)
 
         if (!name || !name.trim()) {
             errors.push(`Förnamn måste fyllas i`)
@@ -675,10 +675,10 @@ router.get("/admin", authenticateToken, async (req, res) => {
 
 router.delete("/delete/dish/:id", async (req, res) => {
     let { id } = req.params
-    console.log(id)
+    (id)
     try {
         let dish = await Dish.findById(id)
-        console.log(dish)
+        (dish)
 
         let result = await Dish.deleteOne({ _id: id })
 
@@ -691,10 +691,10 @@ router.delete("/delete/dish/:id", async (req, res) => {
 
 router.delete("/delete/review/:id", async (req, res) => {
     let { id } = req.params
-    console.log(id)
+    (id)
     try {
         let review = await Review.findById(id)
-        console.log(review)
+        (review)
 
         let result = await Review.deleteOne({ _id: id })
 
@@ -707,10 +707,10 @@ router.delete("/delete/review/:id", async (req, res) => {
 
 router.delete("/delete/contact/:id", async (req, res) => {
     let { id } = req.params
-    console.log(id)
+    (id)
     try {
         let contact = await Contact.findById(id)
-        console.log(contact)
+        (contact)
 
         let result = await Contact.deleteOne({ _id: id })
 
@@ -723,10 +723,10 @@ router.delete("/delete/contact/:id", async (req, res) => {
 
 router.delete("/delete/employee/:id", async (req, res) => {
     let { id } = req.params
-    console.log(id)
+    (id)
     try {
         let employee = await Employee.findById(id)
-        console.log(employee)
+        (employee)
 
         let result = await Employee.deleteOne({ _id: id })
 

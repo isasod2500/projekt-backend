@@ -250,6 +250,7 @@ router.post("/add", upload.single("image"), async (req, res) => {
             .toFile(`uploads/${outputFilename}`)
     }
 
+
     try {
         let { dishname, ingredients, allergens, diet, price, weekday } = req.body;
         let id = `${nanoidFood()}`
@@ -291,7 +292,7 @@ router.post("/add", upload.single("image"), async (req, res) => {
                 allergens,
                 diet,
                 price,
-                image: req.file ? `http://localhost:3000/uploads/${outputFilename}` : null,
+                image: req.file ? outputFilename : null,
                 weekday
             });
             return res.status(201).json({ message: `Dish added: ${result}` })
@@ -392,7 +393,7 @@ router.put("/add/:id", upload.single("image"), async (req, res) => {
                     allergens: allergens,
                     diet: diet,
                     price: price,
-                    image: req.file ? `http://localhost:3000/uploads/${outputFilename}` : null,
+                    image: req.file ? outputFilename : null,
                     weekday: weekday
                 }
             }
@@ -679,10 +680,10 @@ router.delete("/delete/dish/:id", async (req, res) => {
         let dish = await Dish.findById(id)
         console.log(dish)
 
-        let result = await Dish.deleteOne({ _id: id})
+        let result = await Dish.deleteOne({ _id: id })
 
-        return res.status(200).json({ message: `Dish removed`})
-    } catch(err) {
+        return res.status(200).json({ message: `Dish removed` })
+    } catch (err) {
         console.log(err)
         return res.status(500).json({ error: err })
     }
@@ -695,10 +696,10 @@ router.delete("/delete/review/:id", async (req, res) => {
         let review = await Review.findById(id)
         console.log(review)
 
-        let result = await Review.deleteOne({ _id: id})
+        let result = await Review.deleteOne({ _id: id })
 
-        return res.status(200).json({ message: `Review removed`})
-    } catch(err) {
+        return res.status(200).json({ message: `Review removed` })
+    } catch (err) {
         console.log(err)
         return res.status(500).json({ error: err })
     }
@@ -711,10 +712,10 @@ router.delete("/delete/contact/:id", async (req, res) => {
         let contact = await Contact.findById(id)
         console.log(contact)
 
-        let result = await Contact.deleteOne({ _id: id})
+        let result = await Contact.deleteOne({ _id: id })
 
-        return res.status(200).json({ message: `Contact removed`})
-    } catch(err) {
+        return res.status(200).json({ message: `Contact removed` })
+    } catch (err) {
         console.log(err)
         return res.status(500).json({ error: err })
     }
@@ -727,10 +728,10 @@ router.delete("/delete/employee/:id", async (req, res) => {
         let employee = await Employee.findById(id)
         console.log(employee)
 
-        let result = await Employee.deleteOne({ _id: id})
+        let result = await Employee.deleteOne({ _id: id })
 
-        return res.status(200).json({ message: `Employee removed`})
-    } catch(err) {
+        return res.status(200).json({ message: `Employee removed` })
+    } catch (err) {
         console.log(err)
         return res.status(500).json({ error: err })
     }

@@ -307,10 +307,9 @@ router.get("/add/:id", authenticateToken, async (req, res) => {
     try {
         let { id } = req.params
 
-        (id)
 
         let dish = await Dish.findById(id)
-        (dish)
+
         return res.status(200).json(dish)
 
     } catch (err) {
@@ -326,7 +325,7 @@ router.put("/add/:id", upload.single("image"), async (req, res) => {
         https_response: {}
     }
 
-    (`Filnamn: ${req.file}`)
+
 
     const outputFilename = `${Date.now()}.jpg`;
 
@@ -485,7 +484,7 @@ router.get("/orders", authenticateToken, async (req, res) => {
 router.put("/orders/:id", async (req, res) => {
     try {
         let { id } = req.params
-        (id)
+
 
         let order = await Order.findById(id)
 
@@ -510,7 +509,7 @@ router.put("/orders/:id", async (req, res) => {
             { $set: { status: updatedStatus } },
             { new: true }
         );
-        (result)
+
         return res.status(201).json({ message: "Entry updated" })
 
     } catch (err) {
@@ -678,7 +677,7 @@ router.delete("/delete/dish/:id", async (req, res) => {
     (id)
     try {
         let dish = await Dish.findById(id)
-        (dish)
+  
 
         let result = await Dish.deleteOne({ _id: id })
 
@@ -694,7 +693,7 @@ router.delete("/delete/review/:id", async (req, res) => {
     (id)
     try {
         let review = await Review.findById(id)
-        (review)
+
 
         let result = await Review.deleteOne({ _id: id })
 
@@ -710,7 +709,7 @@ router.delete("/delete/contact/:id", async (req, res) => {
     (id)
     try {
         let contact = await Contact.findById(id)
-        (contact)
+
 
         let result = await Contact.deleteOne({ _id: id })
 
@@ -723,7 +722,7 @@ router.delete("/delete/contact/:id", async (req, res) => {
 
 router.delete("/delete/employee/:id", async (req, res) => {
     let { id } = req.params
-    (id)
+  
     try {
         let employee = await Employee.findById(id)
         (employee)

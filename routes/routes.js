@@ -14,7 +14,7 @@ const storage = multer.diskStorage(
         },
 
         filename: (req, file, cb) => {
-            (file)
+
             const ext = path.extname(file.originalname)
             cb(null, `${Date.now()}${ext}`)
         }
@@ -543,7 +543,7 @@ router.post("/contact", async (req, res) => {
 
     try {
         let { firstname, surname, email, phone, message } = req.body;
-        (req.body)
+  
 
         if (!firstname.trim()) {
             errors.push(`Förnamn måste fyllas i`)
@@ -604,7 +604,7 @@ router.post("/review", async (req, res) => {
 
     try {
         let { name, email, rating, message, allowAnswer } = req.body;
-        (req.body)
+  
 
         if (!name || !name.trim()) {
             errors.push(`Förnamn måste fyllas i`)
@@ -674,7 +674,7 @@ router.get("/admin", authenticateToken, async (req, res) => {
 
 router.delete("/delete/dish/:id", async (req, res) => {
     let { id } = req.params
-    (id)
+
     try {
         let dish = await Dish.findById(id)
   
@@ -690,7 +690,7 @@ router.delete("/delete/dish/:id", async (req, res) => {
 
 router.delete("/delete/review/:id", async (req, res) => {
     let { id } = req.params
-    (id)
+
     try {
         let review = await Review.findById(id)
 
@@ -706,7 +706,7 @@ router.delete("/delete/review/:id", async (req, res) => {
 
 router.delete("/delete/contact/:id", async (req, res) => {
     let { id } = req.params
-    (id)
+
     try {
         let contact = await Contact.findById(id)
 
@@ -725,7 +725,7 @@ router.delete("/delete/employee/:id", async (req, res) => {
   
     try {
         let employee = await Employee.findById(id)
-        (employee)
+   
 
         let result = await Employee.deleteOne({ _id: id })
 

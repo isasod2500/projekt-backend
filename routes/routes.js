@@ -238,15 +238,13 @@ router.post("/add", upload.single("image"), async (req, res) => {
         details: "",
         https_response: {}
     }
-
     const outputFilename = `${Date.now()}.jpg`;
+    const outputPath = path.join(__dirname, "../uploads", outputFilename);
 
-    if (req.file) {
-        await sharp(req.file.buffer)
-            .resize(300, 300, { fit: "cover" })
-            .jpeg({ quality: 80 })
-            .toFile(`uploads/${outputFilename}`)
-    }
+    await sharp(req.file.buffer)
+        .resize(300, 300, { fit: "cover" })
+        .jpeg({ quality: 80 })
+        .toFile(outputPath);
 
 
     try {
@@ -541,7 +539,7 @@ router.post("/contact", async (req, res) => {
 
     try {
         let { firstname, surname, email, phone, message } = req.body;
-  
+
 
         if (!firstname.trim()) {
             errors.push(`Förnamn måste fyllas i`)
@@ -602,7 +600,7 @@ router.post("/review", async (req, res) => {
 
     try {
         let { name, email, rating, message, allowAnswer } = req.body;
-  
+
 
         if (!name || !name.trim()) {
             errors.push(`Förnamn måste fyllas i`)
@@ -675,7 +673,7 @@ router.delete("/delete/dish/:id", async (req, res) => {
 
     try {
         let dish = await Dish.findById(id)
-  
+
 
         let result = await Dish.deleteOne({ _id: id })
 
@@ -720,10 +718,10 @@ router.delete("/delete/contact/:id", async (req, res) => {
 
 router.delete("/delete/employee/:id", async (req, res) => {
     let { id } = req.params
-  
+
     try {
         let employee = await Employee.findById(id)
-   
+
 
         let result = await Employee.deleteOne({ _id: id })
 

@@ -239,8 +239,6 @@ router.post("/add", upload.single("image"), async (req, res) => {
         https_response: {}
     }
 
-    (`Filnamn: ${req.file}`)
-
     const outputFilename = `${Date.now()}.jpg`;
 
     if (req.file) {

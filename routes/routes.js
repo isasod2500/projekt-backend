@@ -315,11 +315,6 @@ router.get("/add/:id", authenticateToken, async (req, res) => {
 })
 
 router.put("/add/:id", upload.single("image"), async (req, res) => {
-    let errors = {
-        message: "",
-        details: "",
-        https_response: {}
-    }
 
     const errors = [];
 

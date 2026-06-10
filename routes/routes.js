@@ -321,6 +321,7 @@ router.put("/add/:id", upload.single("image"), async (req, res) => {
         https_response: {}
     }
 
+    const errors = [];
 
 
     const outputFilename = `${Date.now()}.jpg`;
@@ -352,7 +353,6 @@ router.put("/add/:id", upload.single("image"), async (req, res) => {
             weekday = 0;
         } else {
             errors.push(`Veckodag måste fyllas i`)
-
         }
 
         if (!dishname) {
